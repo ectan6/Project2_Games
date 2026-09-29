@@ -178,7 +178,46 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        maxDepth = (self.depth) * (gameState.getNumAgents())
+        
+        return self.expectimax(gameState, "expect", maxDepth, 0)[0]
+        #util.raiseNotDefined()
+
+    def expectimax(self, gameState, action, depth, agentIndex):
+        if depth == 0 or gameState.isLose() or gameState.isWin():
+            return (action, self.evaluationFunction(gameState))
+
+        if agentIndex == 0:
+            return self.maxValue(gameState, action, depth, agentIndex)
+        else:
+            return self.expValue(gameState, action, depth, agentIndex)
+
+    def maxValue(self, gameState, action, depth, agentIndex):
+        bestAction = ("max", -(float('inf')))
+
+        for laction in gameState.getLegalActions(agentIndex):
+            nextAgent = (agentIndex + 1) % gameState.getNumAgents()
+            succAction = None
+            if depth != self.depth * gameState.getNumAgents():
+                succAction = action
+            else:
+                succAction = laction
+            succValue = self.expectimax(gameState.generateSuccessor(agentIndex, laction), succAction, depth - 1, nextAgent)
+            bestAction = max(bestAction, succValue, key = lambda x:x[1])
+
+        return bestAction
+    
+    def expValue(self,gameState,action,depth,agentIndex):
+        lActions = gameState.getLegalActions(agentIndex)
+        averageScore = 0
+        prob = 1.0/len(lActions)
+        for laction in lActions:
+            nextAgent = (agentIndex + 1) % gameState.getNumAgents()
+            bestAction = self.expectimax(gameState.generateSuccessor(agentIndex, laction), action, depth - 1, nextAgent)
+            averageScore += bestAction[1] * prob
+
+        return (action, averageScore)
+
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
