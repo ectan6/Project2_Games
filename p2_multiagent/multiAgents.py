@@ -151,7 +151,53 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #use current gameState -> self.depth and self.evaluationFunction to find the best action
+        bestScore = float('-inf')
+        bestAction = None
+        #return the max bc pacman goes first & return action
+        for action in gameState.getLegalActions(0):
+            successor = gameState.generateSuccessor(0, action)
+            score = self.value(successor, 1, 0)
+            if score > bestScore:
+                bestScore = score
+                bestAction = action
+        return bestAction
+ 
+        #util.raiseNotDefined()
+ 
+    def value (self, gameState, currAgent, currDepth):
+         #base case: game is over or reached certain depth 
+         if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
+             return self.evaluationFunction(gameState)
+         # agent 0 is pacman -> max
+         if currAgent == 0:
+             return self.maxVal(gameState, currAgent, currDepth)
+         # agents >= 1 are ghosts -> min
+         return self.minVal(gameState, currAgent, currDepth)
+ 
+    def minVal(self, gameState, currAgent, currDepth):
+        #initalize v
+        v = float('inf')
+        #for each successor: v = min(v, value(successor))
+        for action in gameState.getLegalActions(currAgent):
+            #calculate the next agent and depth
+            successor = gameState.generateSuccessor(currAgent, action)
+            nextAgent = (currAgent + 1) % gameState.getNumAgents()
+            nextDepth = currDepth + (1 if nextAgent == 0 else 0)
+            #take the min
+            v = min(v, self.value(successor, nextAgent, nextDepth))
+        return v
+
+    def maxVal(self, gameState, currAgent, currDepth):
+        #initalize v neg inf
+        v = float('-inf')
+        for action in gameState.getLegalActions(currAgent):
+            successor = gameState.generateSuccessor(currAgent, action)
+            nextAgent = (currAgent + 1) % gameState.getNumAgents()
+            nextDepth = currDepth + (1 if nextAgent == 0 else 0)
+            #taking max
+            v = max(v, self.value(successor, nextAgent, nextDepth))
+        return v
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
