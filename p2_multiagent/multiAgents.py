@@ -325,18 +325,52 @@ def betterEvaluationFunction(currentGameState: GameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: This function looks at different factors like how much food is left, how far the closest food is, and how close the ghosts are to score the state.
     """
     "*** YOUR CODE HERE ***"
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood().asList()
     score = 0
+    #score = currentGameState.getScore()
+
+    #Look at closest food
+    closest_food_dist = float('inf')
+    for food in newFood:
+        food_dist = util.manhattanDistance(newPos, food)
+        if food_dist < closest_food_dist:
+            closest_food_dist = food_dist
     
-    foodLeft = currentGameState.getNumFood()
-    foodLeftMult = 10
-    score += 1.0 / (foodLeft * foodLeftMult)
-    #Look at how much food is left
-    
+    closestFoodMult = 950
+
+    #Look at food left
+    food_left = currentGameState.getNumFood()
+    foodLeftMult = 950050
+    #score += (1.0 / (food_left + 1)) * foodLeftMult
+
+    #Look at closest ghost
+    closest_ghost_dist = 0
+    for ghost in currentGameState.getGhostPositions():
+        closest_ghost_dist = manhattanDistance(newPos, ghost)
+        if closest_ghost_dist < 2:
+            return -float('inf')
+        #if ghostDist < closest_ghost_dist:
+        #    closest_ghost_dist = ghostDist
+
+    win_or_lose = 0
+    if currentGameState.isLose():
+        win_or_lose = 50000
+    elif currentGameState.isWin():
+        win_or_lose = -50000
+
+    capsules_left = len(currentGameState.getCapsules())
+    capsulesMult = 10000
+
+    score += 1.0/(food_left + 1) * foodLeftMult
+    score += 1.0/(closest_food_dist + 1) * closestFoodMult
+    score += closest_ghost_dist
+    score += win_or_lose
+    score += 1.0/(capsules_left + 1) * capsulesMult
     return score
-    #util.raiseNotDefined()
 
 # Abbreviation
 better = betterEvaluationFunction
